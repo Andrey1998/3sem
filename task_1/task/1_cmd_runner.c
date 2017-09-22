@@ -9,3 +9,26 @@
    a) if execvp is used, string splitting into "path" and "args" is all you need.
 3. Collect exit codes via waitpid/WEXITSTATUS.
 */
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+int main(int argc, char** argv, char** envp)
+{
+        const pid_t pid = fork();
+        if (pid == -1) {
+                printf("fork() error\n");
+                return -1;
+        }
+        if (pid != 0) {
+                int status;
+                waitpid(pid, &status, 0);
+                printf("Ret code: %d\n", WEXITSTATUS(status));
+        } else {
+		execve(argv[1], &argv[2], envp);
+        }
+        return 0;
+}
